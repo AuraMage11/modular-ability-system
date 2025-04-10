@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local BaseAbility = {}
 BaseAbility.__index = BaseAbility
