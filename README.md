@@ -1,7 +1,19 @@
+--[[ 
+	Modular Ability System
+	Author: Aura_Mage11
+
+	Description:
+	A scalable and extendable ability system that allows players to use modular skills 
+	like Fireball, Dash, and Heal. Each ability inherits from a base class and 
+	can be expanded with new logic, cooldowns, effects, or animations.
+--]]
+
+-- Services
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
 local TweenService = game:GetService("TweenService")
 
+-- Base Ability Class
 local BaseAbility = {}
 BaseAbility.__index = BaseAbility
 
@@ -20,7 +32,7 @@ function BaseAbility:CanUse()
 end
 
 function BaseAbility:Activate()
-	warn(self.Name .. " is missing an activation method.")
+	warn(self.Name .. " has no activation function.")
 end
 
 function BaseAbility:Use()
@@ -56,6 +68,7 @@ function BaseAbility:CreateAOE(position, radius, damage)
 	end
 end
 
+-- Fireball Ability
 local Fireball = setmetatable({}, BaseAbility)
 Fireball.__index = Fireball
 
@@ -72,9 +85,9 @@ function Fireball:Activate()
 	local char = self.Player.Character
 	if not char or not char:FindFirstChild("Head") then return end
 
-	local direction = char.Head.CFrame.LookVector
-	local startPos = char.Head.Position + direction * 3
-	local projectile = self:CreateProjectile(startPos, direction, 100, Vector3.new(2, 2, 2), Color3.fromRGB(255, 100, 0), 4)
+	local dir = char.Head.CFrame.LookVector
+	local pos = char.Head.Position + dir * 3
+	local projectile = self:CreateProjectile(pos, dir, 100, Vector3.new(2, 2, 2), Color3.fromRGB(255, 100, 0), 4)
 
 	projectile.Touched:Connect(function(hit)
 		if hit and hit.Parent and hit.Parent ~= char then
@@ -88,6 +101,7 @@ function Fireball:Activate()
 	end)
 end
 
+-- Dash Ability
 local Dash = setmetatable({}, BaseAbility)
 Dash.__index = Dash
 
@@ -105,12 +119,16 @@ function Dash:Activate()
 
 	local hrp = char.HumanoidRootPart
 	local dashVector = hrp.CFrame.LookVector * 50
-	local goal = hrp.Position + dashVector
+	local destination = hrp.Position + dashVector
 
-	local tween = TweenService:Create(hrp, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Position = goal})
+	local tween = TweenService:Create(hrp, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Position = destination
+	})
+
 	tween:Play()
 end
 
+-- Heal Ability
 local Heal = setmetatable({}, BaseAbility)
 Heal.__index = Heal
 
@@ -126,12 +144,14 @@ end
 function Heal:Activate()
 	local char = self.Player.Character
 	if not char then return end
+
 	local humanoid = char:FindFirstChildOfClass("Humanoid")
 	if humanoid then
 		humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + self.HealAmount)
 	end
 end
 
+-- Player Input
 Players.PlayerAdded:Connect(function(player)
 	player.Chatted:Connect(function(msg)
 		if msg == "!fireball" then
